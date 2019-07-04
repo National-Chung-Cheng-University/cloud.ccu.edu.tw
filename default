@@ -1,0 +1,62 @@
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+
+	DocumentRoot /data/HTTPD/htdocs
+	#<Directory />
+	#	Options FollowSymLinks
+	#	AllowOverride None
+	#</Directory>
+	<Directory /data/HTTPD/htdocs/>
+		# Options FollowSymLinks MultiViews
+		Options FollowSymLinks
+		# AllowOverride AuthConfig FileInfo
+		# DirectoryIndex	index.php index.html index.htm
+		DirectoryIndex index.php
+		AllowOverride All
+		Order allow,deny
+		allow from all
+
+		RewriteEngine On
+
+		RewriteRule ^Service/(.*?)/(.*)$ /tools/ServiceMap.php?service=$1&req_path=/$2&%{QUERY_STRING} [L]
+		RewriteRule ^Service/(.*) /tools/ServiceMap.php?service=$1&%{QUERY_STRING} [L]
+		RewriteRule ^HiddenUrl/(.*) /tools/HiddenUrl.php?code=$1&%{QUERY_STRING} [L]
+
+		RewriteCond %{REQUEST_URI}  !\.php$
+		RewriteCond %{REQUEST_URI}  !\.css$
+		RewriteCond %{REQUEST_URI}  !\.js$
+		RewriteCond %{REQUEST_URI}  !/$
+		RewriteCond %{REQUEST_URI}  !/(.+)/tiny_mce/(.+)$
+		RewriteRule ^(.+)/Pages/(.+)$ http://%{HTTP_HOST}/$1/show_page.php?file_path=$2 [R]
+
+		RewriteCond %{REQUEST_URI}  !\.php$
+		RewriteCond %{REQUEST_URI}  !\.css$
+		RewriteCond %{REQUEST_URI}  !\.js$
+		RewriteCond %{REQUEST_URI}  !/$
+		RewriteCond %{REQUEST_URI}  !/Site/images/(.+)$
+		RewriteCond %{REQUEST_URI}  !/Site/tpl_img/(.+)$
+		RewriteCond %{REQUEST_URI}  !/Site/style/(.+)$
+		RewriteCond %{REQUEST_URI}  !/Site/(.+)/style/(.+)$
+		RewriteCond %{REQUEST_URI}  !/(.+)/tiny_mce/(.+)$
+		#RewriteRule ^Site/([^/]+)/(.+)$ http://%{HTTP_HOST}/Site/$1/index.php?file_path=$1/$2 [R]
+		RewriteRule ^Site/(.+)$ http://%{HTTP_HOST}/tools/page/show_page.php?page_url=/Site/$1&%{QUERY_STRING} [R]
+		RewriteRule ^Site/(.+)/$ http://%{HTTP_HOST}/tools/page/show_page.php?page_url=/Site/$1/&%{QUERY_STRING} [R]
+	</Directory>
+
+	ScriptAlias /cgi-bin/ /data/HTTPD/cgi-bin/
+	<Directory "/date/HTTPD/cgi-bin">
+		AllowOverride None
+		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+	ErrorLog /data/HTTPD/logs/error_log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog /data/HTTPD/logs/access_log common
+
+</VirtualHost>
